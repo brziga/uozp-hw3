@@ -73,3 +73,22 @@ for i in range(len(data)):
         dataTfidf[i][keyword]["idf"] = np.log(numAllDocs / keywordsIdf[keyword])
         dataTfidf[i][keyword]["tf-idf"] = dataTfidf[i][keyword]["tf"] * dataTfidf[i][keyword]["idf"]
 
+# probajmo BoW... (bo sparse matrix)
+
+chosenKeywords = [] # bag
+for item in keywordsIdf.items():
+    if item[1] >= 20:
+        chosenKeywords.append(item[0])
+
+bowRepresentations = [[] for i in range(numAllDocs)]
+for i in range(len(dataTfidf)):
+    vrstica = dataTfidf[i]
+    vectorDict = {word : 0 for word in chosenKeywords}
+    for keyword in vrstica.keys():
+        vectorDict[keyword] = vrstica[keyword]["tf-idf"]
+    vector = []
+    for word in chosenKeywords:
+        vector.append(vectorDict[word])
+    bowRepresentations[i] = vector
+
+pass
