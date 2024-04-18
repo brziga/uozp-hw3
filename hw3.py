@@ -1,5 +1,6 @@
 import yaml
 import numpy as np
+from sklearn.decomposition import PCA as skPCA
 
 with open("rtvslo.yaml", "rt") as file:
     data = yaml.load(file, Loader=yaml.CLoader)
@@ -91,4 +92,10 @@ for i in range(len(dataTfidf)):
         vector.append(vectorDict[word])
     bowRepresentations[i] = vector
 
-pass
+
+X = bowRepresentations
+
+pca = skPCA(n_components=3)
+pca.fit(X)
+Y = pca.transform(X)
+
