@@ -1,6 +1,10 @@
+# %pip install PyQt5
+
 import yaml
 import numpy as np
 from sklearn.decomposition import PCA as skPCA
+from vispy import app, scene
+
 
 with open("rtvslo.yaml", "rt") as file:
     data = yaml.load(file, Loader=yaml.CLoader)
@@ -16,6 +20,7 @@ with open("rtvslo.yaml", "rt") as file:
 
 
 # TF-IDF
+print("Calculating TF-IDF...")
 
 # tf
 #   - raw count of a term in a document (kolikokrat se pojavi keyword pri nekem dokumentu - načeloma 1 tukaj)
@@ -66,15 +71,15 @@ for i in range(len(data)):
     for keyword in dataTfidf[i]:
         dataTfidf[i][keyword]["tf"] /= stKeywords
 
-
-
 for i in range(len(data)):
     vrstica = data[i]
     for keyword in vrstica["gpt_keywords"]:
         dataTfidf[i][keyword]["idf"] = np.log(numAllDocs / keywordsIdf[keyword])
         dataTfidf[i][keyword]["tf-idf"] = dataTfidf[i][keyword]["tf"] * dataTfidf[i][keyword]["idf"]
 
+
 # probajmo BoW... (bo sparse matrix)
+print("Creating representations...")
 
 chosenKeywords = [] # bag
 for item in keywordsIdf.items():
@@ -93,9 +98,29 @@ for i in range(len(dataTfidf)):
     bowRepresentations[i] = vector
 
 
+# PCA
+print("Reducing dimensionality...")
+
 X = bowRepresentations
 
 pca = skPCA(n_components=3)
 pca.fit(X)
 Y = pca.transform(X)
 
+
+# Visualization
+print("Showing visualization...")
+
+canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
+view = canvas.central_widget.add_view()
+
+scatter = scene.visuals.Markers()
+scatter.set_data(Y, edge_color=None, face_color=(1, 1, 1, .5), size=5)
+
+view.add(scatter)
+
+view.camera = 'turntable'
+
+axis = scene.visuals.XYZAxis(parent=view.scene)
+
+app.run()
