@@ -3,9 +3,7 @@
 import yaml
 import numpy as np
 from sklearn.decomposition import PCA as skPCA
-from vispy import app, scene
-import matplotlib.pyplot as plt
-import seaborn as sns
+from vispy import app, scene, visuals
 
 
 with open("rtvslo.yaml", "rt") as file:
@@ -131,21 +129,42 @@ for i in range(len(loads)):
     elif loading[2]/np.max(loads, axis=0)[2] > 0.8:
         chosenLoadsIndxs.append(i)
 
-chosenLoads = [loads[i] for i in chosenLoadsIndxs]
+chosenLoads = np.array([loads[i] for i in chosenLoadsIndxs])
 
 
 # Visualization
 print("Showing visualization...")
 
+print("\nLoadings:")
+for indx in chosenLoadsIndxs:
+    print(f"{chosenKeywords[indx]} : {loads[indx]}")
+print()
+
 canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
 view = canvas.central_widget.add_view()
 
+# projections
 scatter = scene.visuals.Markers()
-scatter.set_data(Y, edge_color=None, face_color=(0.36, 0.86, 1, .5), size=5)
+scatter.set_data(Y, edge_color=None, face_color=(0.36, 0.86, 1, 0.5), size=5)
 view.add(scatter)
 
-arrows = scene.visuals.Arrow(pos=points, arrows=points + vectors*0.1, arrow_size=10, arrow_color=(1, 0, 0, 0.5), arrow_type='triangle_60')
-view.add(arrows)
+# origins = np.zeros((len(chosenLoads), 3))
+# arrows = scene.visuals.Arrow(pos=origins, arrows=chosenLoads, arrow_size=10, arrow_color=(0.63, 0.13, 0.94, 1), arrow_type='triangle_60')
+# view.add(arrows)
+
+# loadings
+origin = np.array([0, 0, 0])
+line_data = []
+for endpoint in chosenLoads:
+    line_data.append(origin)
+    line_data.append(endpoint)
+line_data = np.array(line_data)
+lines = scene.visuals.Line(pos=line_data, color=(0.63, 0.13, 0.94, 1), method='gl', connect='segments')
+view.add(lines)
+
+# loadings labels
+for indx in chosenLoadsIndxs:
+    label = scene.visuals.Text(text=chosenKeywords[indx], pos=loads[indx], color='white', font_size=10, parent=view.scene)
 
 view.camera = 'turntable'
 
