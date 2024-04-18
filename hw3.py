@@ -4,6 +4,8 @@ import yaml
 import numpy as np
 from sklearn.decomposition import PCA as skPCA
 from vispy import app, scene
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 with open("rtvslo.yaml", "rt") as file:
@@ -107,6 +109,30 @@ pca = skPCA(n_components=3)
 pca.fit(X)
 Y = pca.transform(X)
 
+# Loadings
+print("Processing loadings...")
+loads = pca.components_.T 
+loadsInfluences = np.linalg.norm(loads, axis=1)
+
+# sns.heatmap(loads, annot=True, cmap='coolwarm', center=0)
+# plt.show()
+
+chosenLoadsIndxs = []
+
+for i in range(len(loads)):
+    # original variable - keyword
+    loading = loads[i]
+    if loadsInfluences[i]/loadsInfluences.max() >= 0.9:
+        chosenLoadsIndxs.append(i)
+    elif loading[0]/np.max(loads, axis=0)[0] > 0.8:
+        chosenLoadsIndxs.append(i)
+    elif loading[1]/np.max(loads, axis=0)[1] > 0.8:
+        chosenLoadsIndxs.append(i)
+    elif loading[2]/np.max(loads, axis=0)[2] > 0.8:
+        chosenLoadsIndxs.append(i)
+
+chosenLoads = [loads[i] for i in chosenLoadsIndxs]
+
 
 # Visualization
 print("Showing visualization...")
@@ -116,8 +142,10 @@ view = canvas.central_widget.add_view()
 
 scatter = scene.visuals.Markers()
 scatter.set_data(Y, edge_color=None, face_color=(0.36, 0.86, 1, .5), size=5)
-
 view.add(scatter)
+
+arrows = scene.visuals.Arrow(pos=points, arrows=points + vectors*0.1, arrow_size=10, arrow_color=(1, 0, 0, 0.5), arrow_type='triangle_60')
+view.add(arrows)
 
 view.camera = 'turntable'
 
