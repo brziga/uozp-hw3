@@ -78,7 +78,7 @@ for i in range(len(data)):
         dataTfidf[i][keyword]["tf-idf"] = dataTfidf[i][keyword]["tf"] * dataTfidf[i][keyword]["idf"]
 
 
-# probajmo BoW... (bo sparse matrix)
+# BoW... (bo sparse matrix)
 print("Creating representations...")
 
 chosenKeywords = [] # bag
@@ -116,17 +116,18 @@ loadsInfluences = np.linalg.norm(loads, axis=1)
 # plt.show()
 
 chosenLoadsIndxs = []
+thresh = 0.8
 
 for i in range(len(loads)):
     # original variable - keyword
     loading = loads[i]
-    if loadsInfluences[i]/loadsInfluences.max() >= 0.9:
+    if loadsInfluences[i]/loadsInfluences.max() >= thresh:
         chosenLoadsIndxs.append(i)
-    elif loading[0]/np.max(loads, axis=0)[0] > 0.8:
+    elif abs(loading[0]/np.max(loads, axis=0)[0]) > thresh:
         chosenLoadsIndxs.append(i)
-    elif loading[1]/np.max(loads, axis=0)[1] > 0.8:
+    elif abs(loading[1]/np.max(loads, axis=0)[1]) > thresh:
         chosenLoadsIndxs.append(i)
-    elif loading[2]/np.max(loads, axis=0)[2] > 0.8:
+    elif abs(loading[2]/np.max(loads, axis=0)[2]) > thresh:
         chosenLoadsIndxs.append(i)
 
 chosenLoads = np.array([loads[i] for i in chosenLoadsIndxs])
@@ -135,7 +136,7 @@ chosenLoads = np.array([loads[i] for i in chosenLoadsIndxs])
 # Visualization
 print("Showing visualization...")
 
-print("\nLoadings:")
+print(f"\nLoadings ({len(chosenLoads)}):")
 for indx in chosenLoadsIndxs:
     print(f"{chosenKeywords[indx]} : {loads[indx]}")
 print()
