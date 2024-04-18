@@ -115,7 +115,7 @@ canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
 view = canvas.central_widget.add_view()
 
 scatter = scene.visuals.Markers()
-scatter.set_data(Y, edge_color=None, face_color=(1, 1, 1, .5), size=5)
+scatter.set_data(Y, edge_color=None, face_color=(0.36, 0.86, 1, .5), size=5)
 
 view.add(scatter)
 
