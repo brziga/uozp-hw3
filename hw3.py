@@ -1,4 +1,5 @@
 import yaml
+import numpy as np
 
 with open("rtvslo.yaml", "rt") as file:
     data = yaml.load(file, Loader=yaml.CLoader)
@@ -23,6 +24,7 @@ with open("rtvslo.yaml", "rt") as file:
 # idf
 #   - N : st dokumentov - len(data)
 #   - number of documents where the term appears
+#   - log N/(num of docs where appear)
 
 # plan:
 #   - cez vse clanke - vrstice v data
@@ -33,14 +35,14 @@ with open("rtvslo.yaml", "rt") as file:
 #   - v locen pomozni dict se daje kljucne besede in steje, kolikokrat se pojavijo
 #   - se en obhod cez data, zdaj se v novi strukturi doda se idf in poracuna tf-idf
 
-dataTfidf = []
-keywordsIdf = {}
 numAllDocs = len(data)
+dataTfidf = [{} for i in range(numAllDocs)]
+keywordsIdf = {}
 
 #cez vse clanke
 for i in range(len(data)):
     vrstica = data[i]
-    dataTfidf[i] = {}
+    # dataTfidf[i] = {}
     stKeywords = len(vrstica["gpt_keywords"])
 
     #cez kljucne besede
@@ -68,6 +70,6 @@ for i in range(len(data)):
 for i in range(len(data)):
     vrstica = data[i]
     for keyword in vrstica["gpt_keywords"]:
-        dataTfidf[i][keyword]["idf"] = keywordsIdf[keyword]
+        dataTfidf[i][keyword]["idf"] = np.log(numAllDocs / keywordsIdf[keyword])
         dataTfidf[i][keyword]["tf-idf"] = dataTfidf[i][keyword]["tf"] * dataTfidf[i][keyword]["idf"]
 
